@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background-color: #fffdd0;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+        }
+        
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fffacd;
+            border: 2px solid #ffd700;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #game-over-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #ffd700;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        #play-again-btn {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #fffacd;
+            border: 2px solid #ffd700;
+            cursor: pointer;
+        }
+
+        #play-options {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+
+        .option-btn {
+            padding: 10px;
+            background-color: #fffacd;
+            border: 2px solid #ffd700;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        #made-by {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+    <title>Tic Tac Toe</title>
+</head>
+<body>
+    <div id="game-board">
+        <div class="cell" onclick="cellClicked(0)"></div>
+        <div class="cell" onclick="cellClicked(1)"></div>
+        <div class="cell" onclick="cellClicked(2)"></div>
+        <div class="cell" onclick="cellClicked(3)"></div>
+        <div class="cell" onclick="cellClicked(4)"></div>
+        <div class="cell" onclick="cellClicked(5)"></div>
+        <div class="cell" onclick="cellClicked(6)"></div>
+        <div class="cell" onclick="cellClicked(7)"></div>
+        <div class="cell" onclick="cellClicked(8)"></div>
+    </div>
+    <div id="game-over-popup">
+        <p id="winner-text"></p>
+        <div id="play-options">
+            <button class="option-btn" onclick="resetGame()">Play Again</button>
+            <button class="option-btn" onclick="playWithFriend()">Play with Friend</button>
+            <button class="option-btn" onclick="playWithAI()">Play with AI</button>
+        </div>
+        <p id="made-by">Made by: Aayush Nikam </p>
+    </div>
+    <script>
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameOver = false;
+        let isPlayingWithAI = false;
+
+        function cellClicked(index) {
+            if (gameBoard[index] === '' && !gameOver) {
+                gameBoard[index] = currentPlayer;
+                document.getElementById('game-board').children[index].textContent = currentPlayer;
+                checkForWinner();
+                switchPlayer();
+
+                if (isPlayingWithAI && currentPlayer === 'O' && !gameOver) {
+                    // AI's turn
+                    makeRandomAIMove();
+                }
+            }
+        }
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+
+        function checkForWinner() {
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            for (const combo of winningCombinations) {
+                const [a, b, c] = combo;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    gameOver = true;
+                    showGameOverPopup(`${currentPlayer} wins!`);
+                    return;
+                }
+            }
+
+            if (!gameBoard.includes('')) {
+                gameOver = true;
+                showGameOverPopup("It's a tie!");
+            }
+        }
+
+        function showGameOverPopup(message) {
+            document.getElementById('winner-text').textContent = message;
+            document.getElementById('game-over-popup').style.display = 'block';
+        }
+
+        function resetGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameOver = false;
+            currentPlayer = 'X';
+            const cells = document.getElementById('game-board').children;
+            for (const cell of cells) {
+                cell.textContent = '';
+            }
+            document.getElementById('game-over-popup').style.display = 'none';
+        }
+
+        function playWithFriend() {
+            isPlayingWithAI = false;
+            resetGame();
+        }
+
+        function playWithAI() {
+            isPlayingWithAI = true;
+            resetGame();
+            if (currentPlayer === 'O' && isPlayingWithAI) {
+                // AI's turn
+                makeRandomAIMove();
+            }
+        }
+
+        function makeRandomAIMove() {
+            // AI makes a random move
+            const emptyCells = gameBoard.reduce((acc, cell, index) => {
+                if (cell === '') {
+                    acc.push(index);
+                }
+                return acc;
+            }, []);
+
+            if (emptyCells.length > 0) {
+                const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                const aiMove = emptyCells[randomIndex];
+                setTimeout(() => {
+                    cellClicked(aiMove);
+                }, 500); // Introducing a delay for a more natural feel
+            }
+        }
+    </script>
+</body>
+</html>
